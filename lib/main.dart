@@ -39,8 +39,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return await FilePicker.platform.getDirectoryPath();
   }
 
-  void _goButtonPressed() {
-    copyImages(_sourceController.text, _destinationController.text);
+  void _goButtonPressed() async {
+    await copyImages(_sourceController.text, _destinationController.text);
     _doneDialog();
   }
 

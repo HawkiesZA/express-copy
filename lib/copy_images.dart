@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
-void copyNewImagesToFolderStructure(List<File> images, String destinationRoot) async {
+Future<void> copyNewImagesToFolderStructure(List<File> images, String destinationRoot) async {
   for (var image in images) {
     DateTime dateTaken = await getFileModifiedDate(image);
     String year = dateTaken.year.toString();
@@ -46,7 +46,7 @@ List<File> findAllFilesInDirectory(String sourceDirectory) {
   return files;
 }
 
-void copyImages(String sourceDir, String destinationDir) {
+Future<void> copyImages(String sourceDir, String destinationDir) async {
   List<File> images = findAllFilesInDirectory(sourceDir);
-  copyNewImagesToFolderStructure(images, destinationDir);
+  await copyNewImagesToFolderStructure(images, destinationDir);
 }
