@@ -1,9 +1,27 @@
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
-Future<void> copyNewImagesToFolderStructure(List<File> images, String destinationRoot) async {
+class Progress {
+  int _completed;
+  final int total;
+
+  Progress({
+    required this.total,
+  }) : _completed = 0;
+
+  completeOne() {
+    _completed++;
+  }
+
+  int completed() {
+    return _completed;
+  }
+}
+
+Iterable<Progress> copyNewImagesToFolderStructure(List<File> images, String destinationRoot) sync* {
+  Progress progress = Progress(total: images.length);
   for (var image in images) {
-    DateTime dateTaken = await getFileModifiedDate(image);
+    DateTime dateTaken = getFileModifiedDate(image);
     String year = dateTaken.year.toString();
     String month = dateTaken.month.toString().padLeft(2, '0');
     String day = dateTaken.day.toString().padLeft(2, '0');
@@ -17,13 +35,15 @@ Future<void> copyNewImagesToFolderStructure(List<File> images, String destinatio
     // Check if the destination image already exists
     if (!File(destinationImage).existsSync()) {
       image.copySync(destinationImage);
+      progress.completeOne();
+      yield progress;
     }
   }
 }
 
-Future<DateTime> getFileModifiedDate(File file) async {
+DateTime getFileModifiedDate(File file) {
   try {
-    var fileStat = await file.stat();
+    var fileStat = file.statSync();
     return fileStat.modified;
   } catch (e) {
     print('Error reading file modification date: $e');
@@ -46,7 +66,7 @@ List<File> findAllFilesInDirectory(String sourceDirectory) {
   return files;
 }
 
-Future<void> copyImages(String sourceDir, String destinationDir) async {
+Iterable<Progress> copyImages(String sourceDir, String destinationDir) {
   List<File> images = findAllFilesInDirectory(sourceDir);
-  await copyNewImagesToFolderStructure(images, destinationDir);
+  return copyNewImagesToFolderStructure(images, destinationDir);
 }

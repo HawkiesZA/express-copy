@@ -34,14 +34,22 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _sourceController = TextEditingController();
   final TextEditingController _destinationController = TextEditingController();
+  double progressValue = 0.0;
+  bool isProgressVisible = false;
 
   Future<String?> _selectDirectory() async {
     return await FilePicker.platform.getDirectoryPath();
   }
 
   void _goButtonPressed() async {
-    await copyImages(_sourceController.text, _destinationController.text);
-    _doneDialog();
+    isProgressVisible = true;
+    setState(() {});
+    Iterable<Progress> progress = copyImages(_sourceController.text, _destinationController.text);
+    for(var p in progress) {
+      progressValue = p.completed() / p.total;
+      setState(() {});
+    }
+    await _doneDialog();
   }
 
   Future<void> _doneDialog() async {
@@ -133,6 +141,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 )
             ),
 
+            Visibility(
+              visible: isProgressVisible,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: LinearProgressIndicator(
+                  value: progressValue,
+                  semanticsLabel: 'Linear progress indicator',
+                ),
+              ),
+            )
           ],
         ),
       ),
